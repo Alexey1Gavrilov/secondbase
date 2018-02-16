@@ -14,7 +14,6 @@
     <name>jsonlogging</name>
 
     <properties>
-        <joda-time.version>2.3</joda-time.version>
         <logback.version>1.2.3</logback.version>
         <logstash-logback-encoder.version>4.9</logstash-logback-encoder.version>
         <hamcrest.version>2.0.0.0</hamcrest.version>
@@ -71,11 +70,6 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda-time.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
