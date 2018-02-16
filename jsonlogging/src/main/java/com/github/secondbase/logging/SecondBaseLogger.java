@@ -21,7 +21,6 @@ import net.logstash.logback.composite.loggingevent.MdcJsonProvider;
 import net.logstash.logback.composite.loggingevent.MessageJsonProvider;
 import net.logstash.logback.composite.loggingevent.StackTraceJsonProvider;
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
-import org.joda.time.DateTimeZone;
 import org.slf4j.LoggerFactory;
 
 public final class SecondBaseLogger {
@@ -177,7 +176,7 @@ public final class SecondBaseLogger {
         if (serviceLog) {
             final LoggingEventFormattedTimestampJsonProvider timeStampProvider
                     = new LoggingEventFormattedTimestampJsonProvider();
-            timeStampProvider.setTimeZone(DateTimeZone.UTC.getID());
+            timeStampProvider.setTimeZone("UTC");
             timeStampProvider.setFieldName("timestamp");
             jsonProviders.addTimestamp(timeStampProvider);
             customFieldsJsonProvider.setCustomFields("{\"type\":\"servicelog\"}");

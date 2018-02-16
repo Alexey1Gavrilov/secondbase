@@ -1,5 +1,11 @@
 package com.github.secondbase.logging;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -12,17 +18,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -119,7 +120,7 @@ public class SecondBaseLoggerTest {
         assertThat(node.get("datacenter").asText(), is("datacenter"));
         assertThat(node.get("service").asText(), is("service"));
         assertThat(node.get("level").asText(), is("INFO"));
-        assertThat(node.has("timestamp"), is(true));
+        assertThat(node.get("timestamp").asText(), Matchers.endsWith("00:00"));
         assertThat(node.get("type").asText(), is("servicelog"));
         encoder.stop();
         outputStream.close();

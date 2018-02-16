@@ -37,7 +37,6 @@
         <dependency>
             <groupId>com.orbitz.consul</groupId>
             <artifactId>consul-client</artifactId>
-            <version>0.16.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.secondbase</groupId>
