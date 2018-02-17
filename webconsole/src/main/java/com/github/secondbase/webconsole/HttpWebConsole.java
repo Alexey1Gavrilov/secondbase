@@ -1,15 +1,15 @@
 package com.github.secondbase.webconsole;
 
+import com.github.secondbase.core.SecondBase;
+import com.github.secondbase.core.SecondBaseException;
+import com.github.secondbase.core.config.SecondBaseModule;
+import com.github.secondbase.webconsole.widget.Widget;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import com.github.secondbase.core.SecondBase;
-import com.github.secondbase.core.SecondBaseException;
-import com.github.secondbase.core.config.SecondBaseModule;
-import com.github.secondbase.webconsole.widget.Widget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +40,7 @@ public final class HttpWebConsole implements SecondBaseModule {
 
     /**
      * Set up the webconsole without widgets using port from {@link WebConsoleConfiguration}.
+     *
      * @throws IOException if server can't start on a given port
      */
     public HttpWebConsole() throws IOException {
@@ -48,6 +49,7 @@ public final class HttpWebConsole implements SecondBaseModule {
 
     /**
      * Set up the webconsole with the given widgets.
+     *
      * @param widgets to use
      * @throws IOException if the server can't start on a given port
      */
@@ -59,6 +61,7 @@ public final class HttpWebConsole implements SecondBaseModule {
 
     /**
      * Load WebConsole Flags and set the secondbase webconsole to "this".
+     *
      * @param secondBase module coordinator
      */
     @Override
@@ -73,16 +76,7 @@ public final class HttpWebConsole implements SecondBaseModule {
         } catch (final IOException e) {
             throw new SecondBaseException("Could not start webconsole.", e);
         }
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                    try {
-                        shutdown();
-                    } catch (final IOException e) {
-                        System.err.println("Could not shutdown webconsole: " + e.getMessage());
-                    }
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     public void start() throws IOException {
@@ -101,12 +95,13 @@ public final class HttpWebConsole implements SecondBaseModule {
         server.start();
     }
 
-    public void shutdown() throws IOException {
+    public void shutdown() {
         if (WebConsoleConfiguration.port == 0) {
             return;
         }
         LOG.info("Shutting down webconsole.");
         server.stop(WebConsoleConfiguration.stopTimeout);
+        WebConsoleConfiguration.port = 0;
     }
 
     public int getPort() {
@@ -115,6 +110,7 @@ public final class HttpWebConsole implements SecondBaseModule {
 
     /**
      * Get the server implementation.
+     *
      * @return HttpServer
      */
     public HttpServer getServer() {

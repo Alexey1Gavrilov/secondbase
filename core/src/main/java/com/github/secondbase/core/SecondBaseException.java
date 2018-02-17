@@ -5,7 +5,7 @@ import java.io.IOException;
 /**
  * Exception wrapper for SecondBase exceptions.
  */
-public class SecondBaseException extends Throwable {
+public class SecondBaseException extends RuntimeException {
     public SecondBaseException(final String s, final IOException e) {
         super(s, e);
     }

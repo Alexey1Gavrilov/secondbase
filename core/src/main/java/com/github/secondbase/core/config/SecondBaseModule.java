@@ -22,4 +22,10 @@ public interface SecondBaseModule {
      * @throws SecondBaseException if errors occur during initialisation
      */
     void init() throws SecondBaseException;
+
+    /**
+     * Release all resources associated with the given module.
+     */
+    default void shutdown() {
+    }
 }

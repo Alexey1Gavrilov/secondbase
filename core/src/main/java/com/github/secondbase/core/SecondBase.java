@@ -3,6 +3,7 @@ package com.github.secondbase.core;
 import com.github.secondbase.core.config.SecondBaseModule;
 import com.github.secondbase.flags.Flag;
 import com.github.secondbase.flags.Flags;
+import java.util.Arrays;
 
 /**
  * Coordination class for SecondBase modules. Handles Flags parsing and cooperation between modules.
@@ -20,6 +21,7 @@ public class SecondBase {
             description = "The environment the service runs in"
     )
     public static String environment = "testing";
+    private final SecondBaseModule[] modules;
 
     private Flags flags;
 
@@ -45,6 +47,7 @@ public class SecondBase {
             final Flags flags)
             throws SecondBaseException {
         this.flags = flags;
+        this.modules = modules;
         flags.loadOpts(SecondBase.class);
         for(final SecondBaseModule module : modules) {
             module.load(this);
@@ -71,5 +74,13 @@ public class SecondBase {
      */
     public Flags getFlags() {
         return flags;
+    }
+
+
+    /**
+     * Release resources allocated by this instance.
+     */
+    public void shutdown() {
+        Arrays.stream(modules).forEach(SecondBaseModule::shutdown);
     }
 }

@@ -1,5 +1,8 @@
 package com.github.secondbase.consul;
 
+import com.github.secondbase.core.SecondBase;
+import com.github.secondbase.core.SecondBaseException;
+import com.github.secondbase.core.config.SecondBaseModule;
 import com.google.common.net.HostAndPort;
 import com.orbitz.consul.Consul;
 import com.orbitz.consul.model.agent.Registration;
@@ -9,9 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.github.secondbase.core.SecondBase;
-import com.github.secondbase.core.SecondBaseException;
-import com.github.secondbase.core.config.SecondBaseModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +70,12 @@ public final class ConsulModule implements SecondBaseModule {
                 ConsulModuleConfiguration.healthCheckPath,
                 ConsulModuleConfiguration.healthCheckIntervalSec,
                 tags);
+    }
+
+    @Override
+    public void shutdown() {
+        consulClient.destroy();
+        consulKeepAlive.shutdown();
     }
 
     /**
@@ -148,6 +154,8 @@ public final class ConsulModule implements SecondBaseModule {
         final String[] tagsArray = Arrays.copyOf(consulCustomTags, consulCustomTags.length + 1);
         tagsArray[tagsArray.length - 1] = environment;
 
+        final long keepAliveInitialDelaySec = 0L;
+        final long keepAlivePeriodSec = 30L;
         consulKeepAlive.scheduleAtFixedRate(
                 createRegisterTask(
                         servicePort,

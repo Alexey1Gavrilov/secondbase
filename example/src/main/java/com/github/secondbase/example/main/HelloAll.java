@@ -1,10 +1,5 @@
 package com.github.secondbase.example.main;
 
-import com.sun.net.httpserver.HttpServer;
-import io.prometheus.client.Counter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import com.github.secondbase.consul.ConsulModule;
 import com.github.secondbase.consul.registration.ConsulRegistrationMetricsWebConsole;
 import com.github.secondbase.core.SecondBase;
@@ -16,6 +11,11 @@ import com.github.secondbase.logging.JsonLoggerModule;
 import com.github.secondbase.webconsole.HttpWebConsole;
 import com.github.secondbase.webconsole.PrometheusWebConsole;
 import com.github.secondbase.webconsole.widget.Widget;
+import com.sun.net.httpserver.HttpServer;
+import io.prometheus.client.Counter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class HelloAll {
     /**
      * Start HelloAll service.
      */
-    public static void startHelloAllService() throws IOException {
+    public static HttpServer startHelloAllService() throws IOException {
         mycounter.inc(counter);
         log.info(var);
 
@@ -54,9 +54,11 @@ public class HelloAll {
             os.close();
         });
         server.start();
+        return server;
     }
 
-    public static void main(final String[] args) throws SecondBaseException, IOException {
+    public static void main(final String[] args)
+            throws SecondBaseException, IOException, InterruptedException {
         final String[] realArgs = {
                 // SecondBase settings
                 "--service-name=HelloAll",
@@ -99,8 +101,13 @@ public class HelloAll {
 
         final Flags flags = new Flags().loadOpts(HelloAll.class);
 
-        new SecondBase(realArgs, modules, flags);
+        final SecondBase secondBase = new SecondBase(realArgs, modules, flags);
 
-        startHelloAllService();
+        final HttpServer server = startHelloAllService();
+
+        Thread.sleep(1000);
+
+        server.stop(0);
+        secondBase.shutdown();
     }
 }

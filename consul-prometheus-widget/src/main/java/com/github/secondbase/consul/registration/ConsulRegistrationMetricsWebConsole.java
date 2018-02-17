@@ -58,6 +58,10 @@ public final class ConsulRegistrationMetricsWebConsole implements SecondBaseModu
         );
     }
 
+    @Override
+    public void shutdown() {
+    }
+
     public ConsulRegistrationMetricsWebConsole(
             final HttpWebConsole webConsole,
             final ConsulModule consulModule) {
