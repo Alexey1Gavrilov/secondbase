@@ -8,19 +8,20 @@ import java.util.Arrays;
 /**
  * Coordination class for SecondBase modules. Handles Flags parsing and cooperation between modules.
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class SecondBase {
 
     @Flag(
             name = "service-name",
             description = "Name of service"
     )
-    public static String serviceName = "";
+    private String serviceName = "";
 
     @Flag(
             name = "service-environment",
             description = "The environment the service runs in"
     )
-    public static String environment = "testing";
+    private String environment = "testing";
     private final SecondBaseModule[] modules;
 
     private Flags flags;
@@ -48,7 +49,7 @@ public class SecondBase {
             throws SecondBaseException {
         this.flags = flags;
         this.modules = modules;
-        flags.loadOpts(SecondBase.class);
+        flags.loadOpts(this);
         for(final SecondBaseModule module : modules) {
             module.load(this);
         }
@@ -82,5 +83,13 @@ public class SecondBase {
      */
     public void shutdown() {
         Arrays.stream(modules).forEach(SecondBaseModule::shutdown);
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public String getEnvironment() {
+        return environment;
     }
 }

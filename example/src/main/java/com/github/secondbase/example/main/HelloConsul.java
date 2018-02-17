@@ -1,8 +1,6 @@
 package com.github.secondbase.example.main;
 
 import com.github.secondbase.consul.ConsulModule;
-import com.github.secondbase.consul.ConsulModuleConfiguration;
-import com.github.secondbase.core.SecondBaseException;
 
 /**
  * Example of how to use the {@link ConsulModule} to register a service.
@@ -10,7 +8,7 @@ import com.github.secondbase.core.SecondBaseException;
 public final class HelloConsul {
     private HelloConsul() {}
 
-    public static void main(final String[] args) throws SecondBaseException {
+    public static void main(final String[] args) throws Exception {
         final String serviceName = "myservice";
         final int servicePort = 8080;
         final String environment = "testing";
@@ -18,11 +16,11 @@ public final class HelloConsul {
         final long healthCheckIntervalSec = 29L;
         final String[] tags = {"tagone", "tagtwo"};
 
-        // Set consul endpoint
-        ConsulModuleConfiguration.host = "localhost:8500";
-
         // Manually register a service in consul
-        new ConsulModule().registerServiceInConsul(
+        final ConsulModule consulModule = new ConsulModule();
+        consulModule.getConfig().setHost("localhost:8500");
+
+        consulModule.registerServiceInConsul(
                 serviceName,
                 servicePort,
                 environment,
@@ -30,5 +28,8 @@ public final class HelloConsul {
                 healthCheckIntervalSec,
                 tags
         );
+
+        Thread.sleep(1000);
+        consulModule.shutdown();
     }
 }

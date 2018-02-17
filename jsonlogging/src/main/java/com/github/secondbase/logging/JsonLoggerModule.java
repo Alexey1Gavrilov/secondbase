@@ -1,17 +1,20 @@
 package com.github.secondbase.logging;
 
+import com.github.secondbase.core.SecondBase;
+import com.github.secondbase.core.config.SecondBaseModule;
 import com.google.common.base.Strings;
 import java.util.LinkedList;
 import java.util.List;
-import com.github.secondbase.core.SecondBase;
-import com.github.secondbase.core.config.SecondBaseModule;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class JsonLoggerModule implements SecondBaseModule {
+    private SecondBase secondBase;
+    private final JsonLoggerConfiguration jsonLoggerConfig = new JsonLoggerConfiguration();
 
     @Override
     public void load(final SecondBase secondBase) {
-        secondBase.getFlags().loadOpts(JsonLoggerConfiguration.class);
+        this.secondBase = secondBase;
+        secondBase.getFlags().loadOpts(jsonLoggerConfig);
     }
 
     @Override
@@ -20,22 +23,22 @@ public class JsonLoggerModule implements SecondBaseModule {
         SLF4JBridgeHandler.install();
         final List<String> keyList = new LinkedList<>();
         final List<String> valueList = new LinkedList<>();
-        if (!Strings.isNullOrEmpty(SecondBase.serviceName)) {
+        if (!Strings.isNullOrEmpty(secondBase.getServiceName())) {
             keyList.add("service");
-            valueList.add(SecondBase.serviceName);
+            valueList.add(secondBase.getServiceName());
         }
-        if (!Strings.isNullOrEmpty(SecondBase.environment)) {
+        if (!Strings.isNullOrEmpty(secondBase.getEnvironment())) {
             keyList.add("environment");
-            valueList.add(SecondBase.environment);
+            valueList.add(secondBase.getEnvironment());
         }
-        if (!Strings.isNullOrEmpty(JsonLoggerConfiguration.datacenter)) {
+        if (!Strings.isNullOrEmpty(jsonLoggerConfig.getDatacenter())) {
             keyList.add("datacenter");
-            valueList.add(JsonLoggerConfiguration.datacenter);
+            valueList.add(jsonLoggerConfig.getDatacenter());
         }
         SecondBaseLogger.setupLoggingStdoutOnly(
                 keyList.toArray(new String[] {}),
                 valueList.toArray(new String[] {}),
-                JsonLoggerConfiguration.requestLoggerClassName,
+                jsonLoggerConfig.getDatacenter(),
                 true);
     }
 }

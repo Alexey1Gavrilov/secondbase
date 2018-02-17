@@ -19,39 +19,43 @@ public final class ConsulRegistrationMetricsWebConsole implements SecondBaseModu
 
     private final HttpWebConsole webConsole;
     private final ConsulModule consulModule;
+    private SecondBase secondBase;
 
     @Override
     public void load(final SecondBase secondBase) {
         // nothing to configure
+        this.secondBase = secondBase;
     }
 
     @Override
     public void init() throws SecondBaseException {
-        if (!ConsulModuleConfiguration.enabled) {
+        final ConsulModuleConfiguration consulModuleConfig = consulModule.getConfig();
+
+        if (!consulModuleConfig.isEnabled()) {
             LOG.info("Consul disabled. Not registering.");
             return;
         }
-        if (SecondBase.serviceName.isEmpty()) {
+        if (secondBase.getServiceName().isEmpty()) {
             LOG.info("No service name defined. Nothing to register yet.");
             return;
         }
-        if (ConsulModuleConfiguration.servicePort == 0) {
+        if (consulModuleConfig.getServicePort() == 0) {
             LOG.error("Service port needs to be defined in order to register a service in consul.");
             return;
         }
-        if (SecondBase.environment.isEmpty()) {
+        if (secondBase.getEnvironment().isEmpty()) {
             LOG.error("Environment needs to be defined in order to register a service in consul.");
             return;
         }
-        if (ConsulModuleConfiguration.healthCheckPath.isEmpty()) {
+        if (consulModuleConfig.getHealthCheckPath().isEmpty()) {
             LOG.error("Health check path needs to be defined in order to register a service in "
                     + "consul.");
             return;
         }
         consulModule.registerServiceInConsul(
-                SecondBase.serviceName,
+                secondBase.getServiceName(),
                 webConsole.getPort(),
-                SecondBase.environment,
+                secondBase.getEnvironment(),
                 "/healthz",
                 29L,
                 "metrics"

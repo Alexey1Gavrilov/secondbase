@@ -43,8 +43,8 @@ public final class ConsulModuleIT {
     }
 
     @Before
-    public void setUp() throws Exception, SecondBaseException {
-        consulClient = ConsulModule.createConsulClient(ConsulModuleConfiguration.host);
+    public void setUp() throws Exception {
+        consulClient = ConsulModule.createConsulClient("localhost:8500");
         consulModule = new ConsulModule(consulClient);
         server = HttpServer.create();
         server.createContext(healthEndpoint, new HealthzHandler());
@@ -61,7 +61,7 @@ public final class ConsulModuleIT {
     }
 
     @Test
-    public void registerService() throws SecondBaseException, Exception {
+    public void registerService() throws Exception {
         final String serviceName = "myservice";
         final String environment = "testing";
         final long healthCheckIntervalSec = 1L;
@@ -104,7 +104,7 @@ public final class ConsulModuleIT {
         assertTrue(serviceRegistered);
 
         // Force deregister thread
-        ConsulModule.deregisterThread.run();
+        consulModule.deregisterThread.run();
 
         // Verify that service is no longer there
         final Map<String, Service> remainingServices = consulClient.agentClient().getServices();

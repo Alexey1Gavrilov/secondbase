@@ -21,6 +21,7 @@ public final class HttpWebConsole implements SecondBaseModule {
     private static final Logger LOG = LoggerFactory.getLogger(HttpWebConsole.class);
     private final HttpServer server;
     private final Widget[] widgets;
+    private final WebConsoleConfiguration webConsoleConfiguration;
 
     /**
      * Basic /healthz endpoint, returning 200 OK.
@@ -57,6 +58,7 @@ public final class HttpWebConsole implements SecondBaseModule {
         server = HttpServer.create();
         server.createContext("/healthz", new HealthzHandler());
         this.widgets = widgets;
+        webConsoleConfiguration = new WebConsoleConfiguration();
     }
 
     /**
@@ -66,7 +68,7 @@ public final class HttpWebConsole implements SecondBaseModule {
      */
     @Override
     public void load(final SecondBase secondBase) {
-        secondBase.getFlags().loadOpts(WebConsoleConfiguration.class);
+        secondBase.getFlags().loadOpts(webConsoleConfiguration);
     }
 
     @Override
@@ -80,14 +82,14 @@ public final class HttpWebConsole implements SecondBaseModule {
     }
 
     public void start() throws IOException {
-        if (WebConsoleConfiguration.port == 0) {
+        if (webConsoleConfiguration.getPort() == 0) {
             return;
         }
         final int useSystemDefaultBacklog = 0;
         server.bind(
-                new InetSocketAddress(WebConsoleConfiguration.port),
+                new InetSocketAddress(webConsoleConfiguration.getPort()),
                 useSystemDefaultBacklog);
-        LOG.info("Starting webconsole on port " + WebConsoleConfiguration.port);
+        LOG.info("Starting webconsole on port " + webConsoleConfiguration.getPort());
         for (final Widget widget : widgets) {
             LOG.info("Adding webconsole widget " + widget.getPath());
             server.createContext(widget.getPath(), widget.getServlet());
@@ -96,16 +98,15 @@ public final class HttpWebConsole implements SecondBaseModule {
     }
 
     public void shutdown() {
-        if (WebConsoleConfiguration.port == 0) {
+        if (webConsoleConfiguration.getPort() == 0) {
             return;
         }
         LOG.info("Shutting down webconsole.");
-        server.stop(WebConsoleConfiguration.stopTimeout);
-        WebConsoleConfiguration.port = 0;
+        server.stop(webConsoleConfiguration.getStopTimeout());
     }
 
     public int getPort() {
-        return WebConsoleConfiguration.port;
+        return webConsoleConfiguration.getPort();
     }
 
     /**

@@ -22,53 +22,55 @@ public final class ConsulModule implements SecondBaseModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsulModule.class.getName());
 
-    private static final ScheduledExecutorService consulKeepAlive
+    private final ScheduledExecutorService consulKeepAlive
             = Executors.newSingleThreadScheduledExecutor();
-    private static final long keepAliveInitialDelaySec = 0L;
-    private static final long keepAlivePeriodSec = 30L;
-    static final DeregisterThread deregisterThread = new DeregisterThread();
-    private static final AtomicBoolean isDeregisterThreadActive = new AtomicBoolean(false);
+    final DeregisterThread deregisterThread = new DeregisterThread();
+    private final AtomicBoolean isDeregisterThreadActive = new AtomicBoolean(false);
 
     private Consul consulClient;
+    private SecondBase secondBase;
+    private final ConsulModuleConfiguration consulModuleConfiguration
+            = new ConsulModuleConfiguration();
 
     @Override
     public void load(final SecondBase secondBase) {
-        secondBase.getFlags().loadOpts(ConsulModuleConfiguration.class);
+        this.secondBase = secondBase;
+        secondBase.getFlags().loadOpts(consulModuleConfiguration);
     }
 
     @Override
     public void init() throws SecondBaseException {
-        if (!ConsulModuleConfiguration.enabled) {
+        if (!consulModuleConfiguration.isEnabled()) {
             LOG.info("Consul disabled. Not registering.");
             return;
         }
-        if (SecondBase.serviceName.isEmpty()) {
+        if (secondBase.getServiceName().isEmpty()) {
             LOG.info("No service name defined. Nothing to register yet.");
             return;
         }
-        if (ConsulModuleConfiguration.servicePort == 0) {
+        if (consulModuleConfiguration.getServicePort()== 0) {
             LOG.error("Service port needs to be defined in order to register a service in consul.");
             return;
         }
-        if (SecondBase.environment.isEmpty()) {
+        if (secondBase.getEnvironment().isEmpty()) {
             LOG.error("Environment needs to be defined in order to register a service in consul.");
             return;
         }
-        if (ConsulModuleConfiguration.healthCheckPath.isEmpty()) {
+        if (consulModuleConfiguration.getHealthCheckPath().isEmpty()) {
             LOG.error("Health check path needs to be defined in order to register a service in "
                     + "consul.");
             return;
         }
-        final String[] tags = (ConsulModuleConfiguration.tags.isEmpty())
+        final String[] tags = (consulModuleConfiguration.getTags().isEmpty())
                 ? new String[]{}
-                : ConsulModuleConfiguration.tags.split(",");
+                : consulModuleConfiguration.getTags().split(",");
 
         registerServiceInConsul(
-                SecondBase.serviceName,
-                ConsulModuleConfiguration.servicePort,
-                SecondBase.environment,
-                ConsulModuleConfiguration.healthCheckPath,
-                ConsulModuleConfiguration.healthCheckIntervalSec,
+                secondBase.getServiceName(),
+                consulModuleConfiguration.getServicePort(),
+                secondBase.getEnvironment(),
+                consulModuleConfiguration.getHealthCheckPath(),
+                consulModuleConfiguration.getHealthCheckIntervalSec(),
                 tags);
     }
 
@@ -93,7 +95,7 @@ public final class ConsulModule implements SecondBaseModule {
 
     public Consul getConsulClient() {
         if (consulClient == null) {
-            consulClient = createConsulClient(ConsulModuleConfiguration.host);
+            consulClient = createConsulClient(consulModuleConfiguration.getHost());
         }
         return consulClient;
     }
@@ -226,5 +228,9 @@ public final class ConsulModule implements SecondBaseModule {
                 LOG.warn("Unable contact consul, trying to check " + serviceName, e);
             }
         };
+    }
+
+    public ConsulModuleConfiguration getConfig() {
+        return consulModuleConfiguration;
     }
 }
